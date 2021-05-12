@@ -1,0 +1,22 @@
+{
+  "name": "spatial-grid",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/server/index.js",
+    "prod": "node src/server/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "async": "^3.2.0",
+    "console-table-printer": "^2.8.2",
+    "diff": "^5.0.0"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.0.2"
+  }
+}
