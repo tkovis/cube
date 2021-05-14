@@ -38,6 +38,11 @@ const setupSocket = (world) => {
     }
   });
 
+  socket.on("disconnect", () => {
+    console.log("dc");
+    window.location.reload();
+  });
+
   socket.auth = { username: Math.random().toString().slice(-8) };
   socket.connect();
 

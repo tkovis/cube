@@ -40,4 +40,4 @@ const handleNewPlayer = (world) => (socket) => {
   socket.broadcast.emit("new player", player);
 };
 
-export default ({ io, world }) => [["connection", handleNewPlayer(world)]];
+export default ({ world }) => [["connection", handleNewPlayer(world)]];
