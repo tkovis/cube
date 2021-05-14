@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   auth: (socket, next) => {
     const username = socket.handshake.auth.username;
     if (!username) {

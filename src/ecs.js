@@ -1,5 +1,5 @@
-const { performance } = require("perf_hooks");
-module.exports = {
+import { performance } from "perf_hooks";
+export default {
   createWorld: () => ({
     entities: { count: 0 },
     components: {},

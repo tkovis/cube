@@ -1,4 +1,4 @@
-const ecs = require("./ecs");
+import ecs from "./ecs";
 
 const newPosition = (world) => ({ eid, position: newPosition }) => {
   const mesh = world.components.mesh.get(eid);
@@ -40,4 +40,4 @@ const handleNewPlayer = (world) => (socket) => {
   socket.broadcast.emit("new player", player);
 };
 
-module.exports = ({ io, world }) => [["connection", handleNewPlayer(world)]];
+export default ({ io, world }) => [["connection", handleNewPlayer(world)]];

@@ -1,3 +1,4 @@
+import io from "socket.io-client";
 import * as worldHandlers from "./world.js";
 import { playerComponents } from "./components.js";
 import ecs from "./ecs.js";
