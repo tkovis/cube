@@ -2,11 +2,11 @@ import io from "socket.io-client";
 import * as worldHandlers from "./world.js";
 import { playerComponents } from "./components.js";
 import ecs from "./ecs.js";
-import { tickRate } from "../shared/constants.json";
+import { tickRate, cameraDamping } from "../shared/constants.json";
 import * as THREE from "three";
 
 const setupSocket = (world) => {
-  const URL = "http://localhost:3000";
+  const URL = "/";
   const socket = io(URL, { autoConnect: false });
 
   socket.on("entities", (entities) => {
@@ -45,7 +45,7 @@ const setupSocket = (world) => {
         idealLookAt.applyQuaternion(target.quaternion);
         idealLookAt.add(target.position);
 
-        const t = 1.0 - Math.pow(0.0005, deltaTime / 1000);
+        const t = 1.0 - Math.pow(cameraDamping, deltaTime / 1000);
 
         currentPosition.lerp(idealOffset, t);
         currentLookAt.lerp(idealLookAt, t);
