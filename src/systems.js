@@ -1,8 +1,8 @@
 import { performance } from "perf_hooks";
+import { tickRate } from "./shared/constants.json";
 
 export const updateSystem = () => {
   let tickTimer = performance.now();
-  const tickRate = 100;
   return {
     name: "updateSystem",
     execute: (world, deltaTime) => {

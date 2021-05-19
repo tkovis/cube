@@ -6,12 +6,13 @@ import {
   controlSystem,
   killSystem,
 } from "./systems.js";
+import { cubeDimension } from "../shared/constants.json";
 
 const systems = [killSystem, moveSystem, debugSystem(), controlSystem];
 
-const createRenderer = () =>
+const createRenderer = (canvas) =>
   new THREE.WebGLRenderer({
-    canvas: document.querySelector("#canvas"),
+    canvas,
   });
 
 const createCamera = () => {
@@ -20,7 +21,8 @@ const createCamera = () => {
   const near = 0.1;
   const far = 100;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.z = 30;
+  camera.position.y = 30;
+  camera.position.z = -30;
   return camera;
 };
 
@@ -30,6 +32,24 @@ const addDirectionalLight = (scene) => {
   const light = new THREE.DirectionalLight(color, intensity);
   light.position.set(-1, 2, 4);
   scene.add(light);
+};
+
+const addAmbientLight = (scene) => {
+  const color = 0xffffff;
+  const intensity = 0.4;
+  const light = new THREE.AmbientLight(color, intensity);
+  scene.add(light);
+};
+
+const addGround = (scene) => {
+  const geo = new THREE.PlaneGeometry(100, 100);
+  const mat = new THREE.MeshLambertMaterial();
+  const ground = new THREE.Mesh(geo, mat);
+  ground.position.x = 0;
+  ground.position.y = 0;
+  ground.position.z = 0;
+  ground.rotation.x = Math.PI * -0.5;
+  scene.add(ground);
 };
 
 const resizeRendererToDisplaySize = (renderer) => {
@@ -55,10 +75,14 @@ const components = [
 ];
 
 export const init = () => {
-  const renderer = createRenderer();
+  const canvas = document.querySelector("#canvas");
+  const renderer = createRenderer(canvas);
   const camera = createCamera();
   const scene = new THREE.Scene();
+  scene.background = new THREE.Color("white");
   addDirectionalLight(scene);
+  addAmbientLight(scene);
+  addGround(scene);
 
   function render() {
     renderer.render(scene, camera);
@@ -76,6 +100,7 @@ export const init = () => {
   console.time("init");
   const world = ecs.createWorld();
 
+  world.resources.canvas = canvas;
   world.resources.downKeys = new Set();
 
   const onDocumentKeyDown = (e) => {
@@ -91,10 +116,11 @@ export const init = () => {
   document.addEventListener("keydown", onDocumentKeyDown);
   document.addEventListener("keyup", onDocumentKeyUp);
 
-  const boxWidth = 1;
-  const boxHeight = 1;
-  const boxDepth = 1;
-  const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+  const geometry = new THREE.BoxGeometry(
+    cubeDimension,
+    cubeDimension,
+    cubeDimension
+  );
 
   const material = new THREE.MeshPhongMaterial({ color: 0x44aa88 });
 

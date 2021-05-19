@@ -1,5 +1,6 @@
 import ecs from "./ecs.js";
 import { updateSystem } from "./systems.js";
+import { cubeDimension } from "./shared/constants.json";
 
 /**
  * Run ecs with "entityCount" entities, give all of them random position and velocity components, move them on each iteration according to moveSystem.
@@ -20,16 +21,11 @@ export const init = () => {
 
   const createRandomEntityComponents = () => {
     const mesh = { position: {}, rotation: {} };
-    mesh.position.x = (Math.random() - 0.5 + Number.EPSILON) * 10;
-    mesh.position.y = (Math.random() - 0.5 + Number.EPSILON) * 10;
-    mesh.position.z = (Math.random() - 0.5 + Number.EPSILON) * 10;
+    mesh.position.x = 0;
+    mesh.position.y = cubeDimension / 2;
+    mesh.position.z = 0;
     return {
       mesh,
-      velocity: {
-        x: (Math.random() - 0.5) * 0.001 + Number.EPSILON,
-        y: (Math.random() - 0.5) * 0.001 + Number.EPSILON,
-        z: (Math.random() - 0.5) * 0.001 + Number.EPSILON,
-      },
     };
   };
 

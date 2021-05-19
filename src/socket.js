@@ -1,13 +1,15 @@
 import ecs from "./ecs";
 
-const newPosition = (world) => ({ eid, position: newPosition }) => {
-  const mesh = world.components.mesh.get(eid);
-  mesh.dirty = true;
-  const currentPosition = mesh.position;
-  currentPosition.x = newPosition.x;
-  currentPosition.y = newPosition.y;
-  currentPosition.z = newPosition.z;
-};
+const newPosition =
+  (world) =>
+  ({ eid, position: newPosition }) => {
+    const mesh = world.components.mesh.get(eid);
+    mesh.dirty = true;
+    const currentPosition = mesh.position;
+    currentPosition.x = newPosition.x;
+    currentPosition.y = newPosition.y;
+    currentPosition.z = newPosition.z;
+  };
 
 const handleNewPlayer = (world) => (socket) => {
   const entityData = {};

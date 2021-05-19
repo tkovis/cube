@@ -2,6 +2,8 @@ import io from "socket.io-client";
 import * as worldHandlers from "./world.js";
 import { playerComponents } from "./components.js";
 import ecs from "./ecs.js";
+import { tickRate } from "../shared/constants.json";
+import * as THREE from "three";
 
 const setupSocket = (world) => {
   const URL = "http://localhost:3000";
@@ -19,6 +21,40 @@ const setupSocket = (world) => {
       ...components,
       ...playerComponents(world),
     });
+    const mesh = world.components.mesh.get(eid);
+    const camera = world.resources.camera;
+
+    world.resources.controls = {
+      currentPosition: new THREE.Vector3(),
+      currentLookAt: new THREE.Vector3(),
+      target: mesh,
+    };
+
+    const controlSystem = {
+      name: "controlSystem",
+      execute: (world, deltaTime) => {
+        const { currentPosition, currentLookAt, target } =
+          world.resources.controls;
+        const camera = world.resources.camera;
+
+        const idealOffset = new THREE.Vector3(-15, 20, -30);
+        idealOffset.applyQuaternion(target.quaternion);
+        idealOffset.add(target.position);
+
+        const idealLookAt = new THREE.Vector3(0, 0, 2);
+        idealLookAt.applyQuaternion(target.quaternion);
+        idealLookAt.add(target.position);
+
+        const t = 1.0 - Math.pow(0.0005, deltaTime / 1000);
+
+        currentPosition.lerp(idealOffset, t);
+        currentLookAt.lerp(idealLookAt, t);
+
+        camera.position.copy(currentPosition);
+        camera.lookAt(currentLookAt);
+      },
+    };
+    world.systems.push(controlSystem);
   });
 
   socket.on("new player", ({ eid, components }) => {
@@ -30,10 +66,12 @@ const setupSocket = (world) => {
   });
 
   socket.on("tick", (meshes) => {
-    const time = 100;
     for (const [eid, mesh] of Object.entries(meshes)) {
       if (eid !== socket.eid) {
-        ecs.appendToComponent(world, eid, "meshUpdates", { mesh, time });
+        ecs.appendToComponent(world, eid, "meshUpdates", {
+          mesh,
+          time: tickRate,
+        });
       }
     }
   });

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import ecs from "./ecs.js";
+import { tickRate } from "../shared/constants.json";
 
 const keyCodes = {
   w: 87,
@@ -39,7 +40,6 @@ export const moveSystem = {
         current.position.copy(world.components.mesh.get(eid).position);
         ecs.addComponents(world, eid, { meshTarget: { current, target } });
         if (!updates.length) {
-          console.log("removing");
           ecs.removeComponents(world, eid, ["meshUpdates"]);
         }
       }
@@ -47,7 +47,7 @@ export const moveSystem = {
 
     world.components.meshTarget.forEach((frame, eid) => {
       frame.target.time += deltaTime;
-      const ratio = Math.max(Math.min(frame.target.time / 100.0, 1.0), 0.0);
+      const ratio = Math.max(Math.min(frame.target.time / tickRate, 1.0), 0.0);
       const desired = new THREE.Vector3();
       desired.copy(frame.current.position);
       desired.lerp(frame.target.mesh.position, ratio);
@@ -83,29 +83,36 @@ export const controlSystem = {
   execute: (world, deltaTime, time) => {
     // set latest target from updates
     world.components.control.forEach((_, eid) => {
-      const position = world.components.mesh.get(eid).position;
+      const mesh = world.components.mesh.get(eid);
       const speed = 0.01;
       let dirty = false;
       if (world.resources.downKeys.has(keyCodes["w"])) {
         dirty = true;
-        position.y += speed * deltaTime;
+        mesh.translateZ(speed * deltaTime);
       }
       if (world.resources.downKeys.has(keyCodes["s"])) {
         dirty = true;
-        position.y -= speed * deltaTime;
+        mesh.translateZ(-speed * deltaTime);
       }
       if (world.resources.downKeys.has(keyCodes["a"])) {
         dirty = true;
-        position.x -= speed * deltaTime;
+        mesh.rotateOnAxis(
+          new THREE.Vector3(0, 1, 0),
+          ((Math.PI / 2) * deltaTime) / 1000
+        );
       }
       if (world.resources.downKeys.has(keyCodes["d"])) {
         dirty = true;
-        position.x += speed * deltaTime;
+        mesh.rotateOnAxis(
+          new THREE.Vector3(0, 1, 0),
+          (-(Math.PI / 2) * deltaTime) / 1000
+        );
       }
       if (dirty) {
         world.resources.socket.emit("new position", {
           eid,
-          position,
+          position: mesh.position,
+          rotation: mesh.rotation,
         });
       }
     });
