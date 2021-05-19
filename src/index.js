@@ -17,7 +17,7 @@ const letThereBePlayers = (world) => {
   ecs.run(world, performance.now());
 };
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
 const world = init();
 letThereBePlayers(world);
