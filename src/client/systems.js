@@ -36,8 +36,12 @@ export const moveSystem = {
       while (updates[0]?.time < 0.0) {
         const target = updates.shift();
         target.time = 0.0;
-        const current = { position: new THREE.Vector3() };
+        const current = {
+          position: new THREE.Vector3(),
+          quaternion: new THREE.Quaternion(),
+        };
         current.position.copy(world.components.mesh.get(eid).position);
+        current.quaternion.copy(world.components.mesh.get(eid).quaternion);
         ecs.addComponents(world, eid, { meshTarget: { current, target } });
         if (!updates.length) {
           ecs.removeComponents(world, eid, ["meshUpdates"]);
@@ -48,13 +52,20 @@ export const moveSystem = {
     world.components.meshTarget.forEach((frame, eid) => {
       frame.target.time += deltaTime;
       const ratio = Math.max(Math.min(frame.target.time / tickRate, 1.0), 0.0);
-      const desired = new THREE.Vector3();
-      desired.copy(frame.current.position);
-      desired.lerp(frame.target.mesh.position, ratio);
-      const position = world.components.mesh.get(eid).position;
-      position.x = desired.x;
-      position.y = desired.y;
-      position.z = desired.z;
+      const desiredPosition = new THREE.Vector3();
+      const desiredQuaternion = new THREE.Quaternion();
+      desiredPosition.copy(frame.current.position);
+      desiredPosition.lerp(frame.target.mesh.position, ratio);
+      desiredQuaternion.copy(frame.current.quaternion);
+      desiredQuaternion.slerp(frame.target.mesh.quaternion, ratio);
+      const { position, quaternion } = world.components.mesh.get(eid);
+      position.x = desiredPosition.x;
+      position.y = desiredPosition.y;
+      position.z = desiredPosition.z;
+      quaternion.x = desiredQuaternion.x;
+      quaternion.y = desiredQuaternion.y;
+      quaternion.z = desiredQuaternion.z;
+      quaternion.w = desiredQuaternion.w;
     });
   },
 };
@@ -71,7 +82,6 @@ export const debugSystem = () => {
         const frameDelta = frameTime2 - frameTime1;
         frameTime1 = frameTime2;
         const fps = 60 / (frameDelta * 0.001);
-        console.log("fps", Math.round(fps));
         updateCounter = 0;
       }
     },
@@ -112,7 +122,7 @@ export const controlSystem = {
         world.resources.socket.emit("new position", {
           eid,
           position: mesh.position,
-          rotation: mesh.rotation,
+          quaternion: mesh.quaternion,
         });
       }
     });

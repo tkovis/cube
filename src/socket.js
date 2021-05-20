@@ -2,13 +2,17 @@ import ecs from "./ecs";
 
 const newPosition =
   (world) =>
-  ({ eid, position: newPosition }) => {
+  ({ eid, position: newPosition, quaternion: newQuaternion }) => {
     const mesh = world.components.mesh.get(eid);
     mesh.dirty = true;
-    const currentPosition = mesh.position;
-    currentPosition.x = newPosition.x;
-    currentPosition.y = newPosition.y;
-    currentPosition.z = newPosition.z;
+    const { position, quaternion } = mesh;
+    position.x = newPosition.x;
+    position.y = newPosition.y;
+    position.z = newPosition.z;
+    quaternion.x = newQuaternion._x;
+    quaternion.y = newQuaternion._y;
+    quaternion.z = newQuaternion._z;
+    quaternion.w = newQuaternion._w;
   };
 
 const handleNewPlayer = (world) => (socket) => {

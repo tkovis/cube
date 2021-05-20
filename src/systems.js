@@ -18,7 +18,9 @@ export const updateSystem = () => {
         }
       }
       world.components.socket.forEach((socket) => {
-        socket.emit("tick", updatedMeshes);
+        if (Object.keys(updatedMeshes).length) {
+          socket.emit("tick", updatedMeshes);
+        }
       });
       tickTimer = 0;
     },

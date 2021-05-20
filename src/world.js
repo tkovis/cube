@@ -20,7 +20,7 @@ export const init = () => {
   world.resources.createEntity = createEntity;
 
   const createRandomEntityComponents = () => {
-    const mesh = { position: {}, rotation: {} };
+    const mesh = { position: {}, quaternion: {} };
     mesh.position.x = 0;
     mesh.position.y = cubeDimension / 2;
     mesh.position.z = 0;
