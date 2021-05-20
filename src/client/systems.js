@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import ecs from "./ecs.js";
-import { tickRate } from "../shared/constants.json";
+import constants from "../shared/constants.json";
+
+const { tickRate } = constants;
 
 const keyCodes = {
   w: 87,

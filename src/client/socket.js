@@ -2,8 +2,10 @@ import io from "socket.io-client";
 import * as worldHandlers from "./world.js";
 import { playerComponents } from "./components.js";
 import ecs from "./ecs.js";
-import { tickRate, cameraDamping } from "../shared/constants.json";
+import constants from "../shared/constants.json";
 import * as THREE from "three";
+
+const { tickRate, cameraDamping } = constants;
 
 const setupSocket = (world) => {
   const URL = "/";

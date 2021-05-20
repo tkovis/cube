@@ -1,6 +1,8 @@
 import ecs from "./ecs.js";
 import { updateSystem } from "./systems.js";
-import { cubeDimension } from "./shared/constants.json";
+import constants from "./shared/constants.json";
+
+const { cubeDimension } = constants;
 
 /**
  * Run ecs with "entityCount" entities, give all of them random position and velocity components, move them on each iteration according to moveSystem.

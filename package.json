@@ -15,7 +15,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.0",
     "express": "^4.17.1",
+    "level-rocksdb": "^4.0.0",
     "socket.io": "^4.1.1",
     "socket.io-client": "^4.1.1",
     "three": "^0.128.0"

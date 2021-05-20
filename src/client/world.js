@@ -6,7 +6,9 @@ import {
   controlSystem,
   killSystem,
 } from "./systems.js";
-import { cubeDimension } from "../shared/constants.json";
+import constants from "../shared/constants.json";
+
+const { cubeDimension } = constants;
 
 const systems = [killSystem, moveSystem, debugSystem(), controlSystem];
 

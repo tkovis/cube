@@ -1,5 +1,7 @@
 import { performance } from "perf_hooks";
-import { tickRate } from "./shared/constants.json";
+import constants from "./shared/constants.json";
+
+const { tickRate } = constants;
 
 export const updateSystem = () => {
   let tickTimer = performance.now();
