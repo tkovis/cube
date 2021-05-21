@@ -24,7 +24,7 @@ export const init = () => {
       quaternion: {},
     };
     mesh.position = mesh.position || { x: 0, y: cubeDimension / 2, z: 0 };
-    mesh.quaternion = mesh.quaternion || {};
+    mesh.quaternion = mesh.quaternion || { x: 0, y: 0, z: 0, w: -1 };
     return {
       mesh,
       username,

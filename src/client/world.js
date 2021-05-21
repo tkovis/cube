@@ -148,9 +148,8 @@ export const init = () => {
 };
 
 export const onNewEntity = (world, eid, components) => {
-  const position = components.mesh?.position;
-  const quaternion = components.mesh?.quaternion;
-  if (position) {
+  if (components.mesh) {
+    const { position, quaternion } = components.mesh;
     const mesh = new THREE.Mesh(
       world.resources.geometries.cube,
       world.resources.materials.cube
@@ -163,5 +162,28 @@ export const onNewEntity = (world, eid, components) => {
     world.resources.scene.add(mesh);
     components.mesh = mesh;
   }
+  if (components.username && components.mesh) {
+    const context2d = document.createElement("canvas").getContext("2d");
+    context2d.canvas.width = 256;
+    context2d.canvas.height = 128;
+    context2d.fillStyle = "#FFF";
+    context2d.font = "18pt Helvetica";
+    context2d.shadowOffsetX = 3;
+    context2d.shadowOffsetY = 3;
+    context2d.shadowColor = "rgba(0,0,0,0.3)";
+    context2d.shadowBlur = 4;
+    context2d.textAlign = "center";
+    context2d.fillText(components.username, 128, 64);
+
+    const map = new THREE.CanvasTexture(context2d.canvas);
+
+    const sprite = new THREE.Sprite(
+      new THREE.SpriteMaterial({ map: map, color: 0xffffff, fog: false })
+    );
+    sprite.scale.set(10, 5, 1);
+    sprite.position.y += 5;
+    components.mesh.add(sprite);
+  }
+
   ecs.createEntity(world, eid, components);
 };
