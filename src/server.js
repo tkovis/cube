@@ -3,6 +3,7 @@ import path from "path";
 import http from "http";
 import bodyParser from "body-parser";
 import users from "./users";
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "./jwt";
 
 export const app = express();
 app.use(express.static(path.join(__dirname, "/client")));
@@ -21,17 +22,38 @@ app.post("/register", async ({ body: { username, password } }, res) => {
         "password didn't pass regex min length 8, 1 upper and lowercase letter, 1 number, 1 special character",
     });
 
-  const existingUser = await users.get(username);
-  if (existingUser) {
+  const existingUserId = await users.getId(username);
+  if (existingUserId) {
     return res.status(400).json({ error: "username exists" });
   }
 
-  await users.put(username, password);
+  await Promise.all([
+    users.putPassword(username, password),
+    users.putId(username),
+  ]);
 
   return res.status(200).json({ message: "ok" });
 });
 
-app.post("/login", async ({ body: { username, password } }, res) => {
+app.post("/token", async ({ body: { username, password, token } }, res) => {
+  if (token) {
+    try {
+      const decoded = await verifyRefreshToken(token);
+      const payload = { username: decoded.username };
+      if (decoded) {
+        const [accessToken, refreshToken] = await Promise.all([
+          signAccessToken(payload),
+          signRefreshToken(payload),
+        ]);
+        return res
+          .status(200)
+          .json({ message: "ok", accessToken, refreshToken });
+      }
+    } catch (e) {
+      return res.status(400).json({ error: "invalid token" });
+    }
+  }
+
   if (!username || typeof username !== "string")
     return res.status(400).json({ error: "string username required" });
   if (!password || typeof password !== "string")
@@ -39,13 +61,18 @@ app.post("/login", async ({ body: { username, password } }, res) => {
       error: "string password required",
     });
 
-  const hashedPassword = await users.get(username);
+  const hashedPassword = await users.getPassword(username);
   if (!hashedPassword) {
     return res.status(400).json({ error: "user does not exist" });
   }
 
   if (await users.isValidPassword(password, hashedPassword)) {
-    return res.status(200).json({ message: "ok" });
+    const payload = { username };
+    const [accessToken, refreshToken] = await Promise.all([
+      signAccessToken(payload),
+      signRefreshToken(payload),
+    ]);
+    return res.status(200).json({ message: "ok", accessToken, refreshToken });
   }
   return res.status(400).json({ error: "invalid password" });
 });

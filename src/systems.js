@@ -1,5 +1,6 @@
 import { performance } from "perf_hooks";
 import constants from "./shared/constants.json";
+import db from "./db";
 
 const { tickRate } = constants;
 
@@ -17,6 +18,9 @@ export const updateSystem = () => {
         if (mesh.dirty) {
           updatedMeshes[eid] = mesh;
           mesh.dirty = false;
+
+          const { position, quaternion } = mesh;
+          db.put(`entities.${eid}.mesh`, { position, quaternion });
         }
       }
       world.components.socket.forEach((socket) => {

@@ -12,7 +12,6 @@ export default ({ server, world }) => {
   io.use(middleware.auth);
 
   const handlers = setupHandlers({ io, world });
-
   for (const [event, handler] of handlers) {
     io.on(event, handler);
   }

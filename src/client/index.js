@@ -23,13 +23,41 @@ const login = async (e) => {
   const username = document.getElementById("login-username").value;
   const password = document.getElementById("login-password").value;
 
-  const res = await backend.post("/login", { username, password });
+  const res = await backend.post("/token", { username, password });
   if (res.status === 200) {
+    sessionStorage.setItem("accessToken", res.json.accessToken);
+    sessionStorage.setItem("refreshToken", res.json.refreshToken);
     startGame();
   }
 };
 
 document.getElementById("login-form").onsubmit = login;
+
+const resumeSession = async () => {
+  const preGameElement = document.getElementById("pre-game");
+  const token = sessionStorage.getItem("refreshToken");
+  if (!token) {
+    preGameElement.style = "visibility: none;";
+    return;
+  }
+  try {
+    const { status, json } = await backend.post("/token", { token });
+    if (status === 200) {
+      sessionStorage.setItem("accessToken", json.accessToken);
+      sessionStorage.setItem("refreshToken", json.refreshToken);
+      preGameElement.style = "visibility: none;";
+      startGame();
+      return;
+    }
+    preGameElement.style = "visibility: none;";
+    return;
+  } catch (e) {
+    preGameElement.style = "visibility: none;";
+    return;
+  }
+};
+
+resumeSession();
 
 const startGame = () => {
   document.getElementById("login")?.remove();

@@ -24,7 +24,6 @@ const setupSocket = (world) => {
       ...playerComponents(world),
     });
     const mesh = world.components.mesh.get(eid);
-    const camera = world.resources.camera;
 
     world.resources.controls = {
       currentPosition: new THREE.Vector3(),
@@ -56,7 +55,7 @@ const setupSocket = (world) => {
         camera.lookAt(currentLookAt);
       },
     };
-    world.systems.push(controlSystem);
+    ecs.registerSystem(world, controlSystem);
   });
 
   socket.on("new player", ({ eid, components }) => {
@@ -79,11 +78,11 @@ const setupSocket = (world) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("dc");
     window.location.reload();
   });
 
-  socket.auth = { username: Math.random().toString().slice(-8) };
+  const accessToken = sessionStorage.getItem("accessToken");
+  socket.auth = { accessToken };
   socket.connect();
 
   window.addEventListener("beforeunload", () => socket.disconnect());

@@ -74,6 +74,7 @@ const components = [
   "velocity",
   "age",
   "kill",
+  "username",
 ];
 
 export const init = () => {
@@ -148,6 +149,7 @@ export const init = () => {
 
 export const onNewEntity = (world, eid, components) => {
   const position = components.mesh?.position;
+  const quaternion = components.mesh?.quaternion;
   if (position) {
     const mesh = new THREE.Mesh(
       world.resources.geometries.cube,
@@ -156,6 +158,8 @@ export const onNewEntity = (world, eid, components) => {
     mesh.position.x = position.x;
     mesh.position.y = position.y;
     mesh.position.z = position.z;
+    const { x = 0, y = 0, z = 0, w = 0 } = quaternion;
+    mesh.setRotationFromQuaternion(new THREE.Quaternion(x, y, z, w));
     world.resources.scene.add(mesh);
     components.mesh = mesh;
   }

@@ -15,13 +15,13 @@ const newPosition =
     quaternion.w = newQuaternion._w;
   };
 
-const handleNewPlayer = (world) => (socket) => {
+const handleNewPlayer = (world) => async (socket) => {
   const entityData = {};
   for (const [eid, components] of Object.entries(world.entities)) {
     if (eid !== "count") {
       entityData[eid] = {};
       for (const component of components) {
-        if (component !== "socket") {
+        if (!["socket"].includes(component)) {
           entityData[eid][component] = world.components[component].get(eid);
         }
       }
@@ -29,8 +29,15 @@ const handleNewPlayer = (world) => (socket) => {
   }
   socket.emit("entities", entityData);
 
-  const components = world.resources.createRandomEntityComponents();
-  const eid = world.resources.createEntity(world, { ...components, socket });
+  const components = await world.resources.createPlayerComponents(
+    socket.userId,
+    socket.username
+  );
+  const eid = world.resources.createEntity(
+    world,
+    { ...components, socket },
+    socket.userId
+  );
   const player = { eid, components };
   socket.emit("player spawned", player);
 

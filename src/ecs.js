@@ -1,4 +1,6 @@
 import { performance } from "perf_hooks";
+import { v4 as uuidv4 } from "uuid";
+
 export default {
   createWorld: () => ({
     entities: { count: 0 },
@@ -9,10 +11,8 @@ export default {
   registerComponent: (world, name) => {
     world.components[name] = new Map();
   },
-  initializeCreateEntity: (autoIncremenStart = 0) => {
-    let start = autoIncremenStart;
-    return (world, components = {}) => {
-      const eid = (++start).toString();
+  initializeCreateEntity: () => {
+    return (world, components = {}, eid = uuidv4()) => {
       world.entities[eid] = new Set(Object.keys(components));
       world.entities.count++;
       Object.entries(components).forEach(([name, value]) => {

@@ -1,6 +1,9 @@
 import level from "level-rocksdb";
+import beforeShutdown from "./beforeShutdown";
 
 const db = level("./mydb");
+
+beforeShutdown(() => db.close());
 
 const put = (k, v) =>
   new Promise((resolve, reject) => {
@@ -13,11 +16,10 @@ const put = (k, v) =>
 const get = (k) =>
   new Promise((resolve, reject) => {
     db.get(k, function (err, value) {
-      const notFoundError = err?.message.includes("Key not found in database");
-      if (notFoundError) {
-        return resolve(null);
-      } else if (!notFoundError && err) {
-        console.log(!notFoundError, err);
+      if (err) {
+        if (err.type === "NotFoundError") {
+          return resolve(null);
+        }
         return reject(err);
       }
       resolve(JSON.parse(value));
