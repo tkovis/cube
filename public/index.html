@@ -11,30 +11,64 @@
            height: 100%;
            display: block;
         }
+        #ui {
+           position: absolute;
+           width: 100%;
+           height: 100%;
+           display: block;
+        }
+        #ui * {
+           position: absolute;
+        }
+        .center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .center * {
+            margin: 0.3em;
+        }
+        .full-width {
+            width: calc(100% - 0.6em);
+        }
+        .left {
+            align-self: flex-start;
+        }
+        .sign-form {
+            height: 75vh;
+        }
         </style>
 </head>
 <body>
-    <div id="pre-game" style="visibility: hidden;">
-        <div id="login">
-            <h1>Login</h1>
-            <form id="login-form">
-                <label for="username">username</label>
-                <input type="text" id="login-username" name="login-username"/>
-                <label for="password">password</label>
-                <input type="password" id="login-password" name="login-password"/>
-                <button type="submit">login</button>
-            </form>
-        </div>
-        <div id="register">
-            <h1>Register</h1>
-            <form id="register-form">
-                <label for="username">username</label>
-                <input type="text" id="register-username" name="register-username"/>
-                <label for="password">password</label>
-                <input type="password" id="register-password" name="register-password"/>
-                <button type="submit">login</button>
-            </form>
+    <div id="pre-game" class="center" style="display: none;" >
+        <div class="center sign-form">
+            <div id="login" class="center">
+                <h1>Login</h1>
+                <form id="login-form" class="center">
+                    <label for="username" class="left">Username</label>
+                    <input type="text" id="login-username" name="login-username"/>
+                    <label for="password" class="left">Password</label>
+                    <input type="password" id="login-password" name="login-password"/>
+                    <button type="submit" class="full-width">Login</button>
+                </form>
+                <a href="/" id="register-link">No account? Register!</a>
+            </div>
+            <div id="register" class="center sign-form" style="display: none;">
+                <h1>Register</h1>
+                <form id="register-form" class="center">
+                    <label for="username" class="left">Username</label>
+                    <input type="text" id="register-username" name="register-username"/>
+                    <label for="password" class="left">Password</label>
+                    <input type="password" id="register-password" name="register-password"/>
+                    <button type="submit" class="full-width">Register</button>
+                </form>
+                <a href="/" id="login-link">Go to login</a>
+            </div>
         </div>
     </div>
-    <canvas id="canvas" style="width: 100%; height: 100%; display: block;"></canvas>
+    <div id="ui" style="display: none;">
+        <button id="logout" style="right: 0.5em; top: 0.5em;">logout</button>
+    </div>
+    <canvas id="canvas" style="display: none;"></canvas>
 </body>

@@ -4,6 +4,22 @@ import ecs from "./ecs.js";
 import { strongRegex } from "../shared/regex";
 import backend from "./backend";
 
+const goToRegister = async (e) => {
+  e.preventDefault();
+  document.getElementById("login").style = "display: none;";
+  document.getElementById("register").style = "";
+};
+
+document.getElementById("register-link").onclick = goToRegister;
+
+const goToLogin = async (e) => {
+  e?.preventDefault();
+  document.getElementById("register").style = "display: none;";
+  document.getElementById("login").style = "";
+};
+
+document.getElementById("login-link").onclick = goToLogin;
+
 const register = async (e) => {
   e.preventDefault();
   const username = document.getElementById("register-username").value;
@@ -12,7 +28,8 @@ const register = async (e) => {
   const res = await backend.post("/register", { username, password });
 
   if (res.status === 200) {
-    document.getElementById("register").remove();
+    goToLogin();
+    document.getElementById("login-username").value = username;
   }
 };
 
@@ -32,6 +49,13 @@ const login = async (e) => {
 };
 
 document.getElementById("login-form").onsubmit = login;
+
+const logout = async () => {
+  sessionStorage.clear();
+  location.reload();
+};
+
+document.getElementById("logout").onclick = logout;
 
 const resumeSession = async () => {
   const preGameElement = document.getElementById("pre-game");
@@ -60,8 +84,9 @@ const resumeSession = async () => {
 resumeSession();
 
 const startGame = () => {
-  document.getElementById("login")?.remove();
-  document.getElementById("register")?.remove();
+  document.getElementById("pre-game").style = "display: none;";
+  document.getElementById("canvas").style = "";
+  document.getElementById("ui").style = "";
   const world = init();
 
   setupSocket(world);
