@@ -7,11 +7,45 @@ import * as THREE from "three";
 
 const { tickRate, cameraDamping } = constants;
 
-const messageDisplayer = (displayElement) => (username, text) => {
+const secondsPerWord = 1 / 4;
+const reactionTime = 2;
+
+const messageDisplayer = (displayElement) => (username, textInput, mesh) => {
+  const text = textInput.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
   const message = document.createElement("div");
   message.classList = "chat-text";
   message.innerText = `[${username}]: ${text}`;
   displayElement.append(message);
+
+  const context2d = document.createElement("canvas").getContext("2d");
+  context2d.canvas.width = 256;
+  context2d.canvas.height = 128;
+  context2d.fillStyle = "rgba(128,128,128,128.5)";
+  context2d.fillRect(0, 0, canvas.width, canvas.height);
+  context2d.fillStyle = "#FFF";
+  context2d.font = "22pt Helvetica";
+  context2d.shadowOffsetX = 3;
+  context2d.shadowOffsetY = 3;
+  context2d.shadowColor = "rgba(0,0,0,0.3)";
+  context2d.shadowBlur = 4;
+  context2d.textAlign = "center";
+  context2d.fillText(text, 128, 64);
+
+  const map = new THREE.CanvasTexture(context2d.canvas);
+
+  const sprite = new THREE.Sprite(
+    new THREE.SpriteMaterial({ map: map, color: 0xffffff, fog: false })
+  );
+  sprite.scale.set(10, 5, 1);
+  sprite.position.y += 5;
+
+  const wordCount = text.split(" ").length;
+  console.log(wordCount);
+
+  mesh.add(sprite);
+  setTimeout(() => {
+    mesh.remove(sprite);
+  }, (reactionTime + wordCount * secondsPerWord) * 1000);
 };
 
 const setupSocket = (world) => {
@@ -32,6 +66,7 @@ const setupSocket = (world) => {
     });
     world.resources.username = components.username;
     const mesh = world.components.mesh.get(eid);
+    world.resources.mesh = mesh;
 
     world.resources.controls = {
       currentPosition: new THREE.Vector3(),
@@ -113,7 +148,7 @@ const setupSocket = (world) => {
         const text = chatInputElement.value;
         socket.emit("chat-message", text);
 
-        displayMessage(world.resources.username, text);
+        displayMessage(world.resources.username, text, world.resources.mesh);
 
         chatInputElement.value = "";
         chatInputElement.blur();
@@ -133,8 +168,9 @@ const setupSocket = (world) => {
     console.log(e.keyCode);
   };
 
-  socket.on("chat-message", ({ username, text }) => {
-    displayMessage(username, text);
+  socket.on("chat-message", ({ eid, username, text }) => {
+    const mesh = world.components.mesh.get(eid);
+    displayMessage(username, text, mesh);
   });
 
   document.addEventListener("keydown", onDocumentKeyDown);
