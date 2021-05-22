@@ -52,7 +52,6 @@ const handleNewPlayer = (world) => async (socket) => {
 
   socket.on("chat-message", (text) => {
     const username = world.components.username.get(socket.userId);
-    console.log({ eid: socket.userId, username, text });
     socket.broadcast.emit("chat-message", {
       eid: socket.userId,
       username,

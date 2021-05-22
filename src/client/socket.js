@@ -8,44 +8,70 @@ import * as THREE from "three";
 const { tickRate, cameraDamping } = constants;
 
 const secondsPerWord = 1 / 4;
-const reactionTime = 2;
+const reactionTime = 1.5;
 
 const messageDisplayer = (displayElement) => (username, textInput, mesh) => {
-  const text = textInput.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
+  const text = textInput.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " "); // remove extra whitespace
   const message = document.createElement("div");
   message.classList = "chat-text";
   message.innerText = `[${username}]: ${text}`;
   displayElement.append(message);
 
-  const context2d = document.createElement("canvas").getContext("2d");
+  const canvas = document.createElement("canvas");
+  const context2d = canvas.getContext("2d");
   context2d.canvas.width = 256;
   context2d.canvas.height = 128;
   context2d.fillStyle = "rgba(128,128,128,128.5)";
   context2d.fillRect(0, 0, canvas.width, canvas.height);
   context2d.fillStyle = "#FFF";
-  context2d.font = "22pt Helvetica";
+  context2d.font = "18pt Helvetica";
   context2d.shadowOffsetX = 3;
   context2d.shadowOffsetY = 3;
   context2d.shadowColor = "rgba(0,0,0,0.3)";
   context2d.shadowBlur = 4;
   context2d.textAlign = "center";
-  context2d.fillText(text, 128, 64);
+
+  const maxWidth = context2d.canvas.width * 0.9;
+  const words = text.split(" ");
+  const lines = [];
+  let currentLine = [];
+  for (const word of words) {
+    const line = [...currentLine, word].join(" ");
+    const { width } = context2d.measureText(line);
+    if (width < maxWidth) {
+      currentLine.push(word);
+    } else {
+      lines.push(line);
+      currentLine = [];
+    }
+  }
+  const lastLine = currentLine.join(" ");
+  if (lastLine) {
+    lines.push(lastLine);
+  }
+  const lineHeight = 26;
+  const offset = (lineHeight * lines.length) / 2;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    context2d.fillText(line, 128, 64 - offset + lineHeight * (i + 1));
+  }
 
   const map = new THREE.CanvasTexture(context2d.canvas);
 
   const sprite = new THREE.Sprite(
     new THREE.SpriteMaterial({ map: map, color: 0xffffff, fog: false })
   );
-  sprite.scale.set(10, 5, 1);
+  sprite.scale.set(11, 6, 1);
   sprite.position.y += 5;
 
   const wordCount = text.split(" ").length;
-  console.log(wordCount);
 
   mesh.add(sprite);
   setTimeout(() => {
     mesh.remove(sprite);
-  }, (reactionTime + wordCount * secondsPerWord) * 1000);
+    map.dispose();
+    canvas.remove();
+  }, Math.min((reactionTime + wordCount * secondsPerWord) * 1000, 10_000));
 };
 
 const setupSocket = (world) => {
