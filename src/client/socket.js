@@ -20,7 +20,7 @@ const messageDisplayer = (displayElement) => (username, textInput, mesh) => {
   const canvas = document.createElement("canvas");
   const context2d = canvas.getContext("2d");
   context2d.canvas.width = 256;
-  context2d.canvas.height = 128;
+  context2d.canvas.height = 136;
   context2d.fillStyle = "rgba(128,128,128,128.5)";
   context2d.fillRect(0, 0, canvas.width, canvas.height);
   context2d.fillStyle = "#FFF";
@@ -31,7 +31,7 @@ const messageDisplayer = (displayElement) => (username, textInput, mesh) => {
   context2d.shadowBlur = 4;
   context2d.textAlign = "center";
 
-  const maxWidth = context2d.canvas.width * 0.9;
+  const maxWidth = context2d.canvas.width * 0.8;
   const words = text.split(" ");
   const lines = [];
   let currentLine = [];
@@ -50,9 +50,14 @@ const messageDisplayer = (displayElement) => (username, textInput, mesh) => {
     lines.push(lastLine);
   }
   const lineHeight = 26;
-  const offset = (lineHeight * lines.length) / 2;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  const truncated = lines.length > 4;
+  const displayLines = lines.slice(0, 4);
+  const offset = (lineHeight * displayLines.length) / 2;
+  if (truncated) {
+    displayLines[3] = displayLines[3].slice(0, -3).trim() + "...";
+  }
+  for (let i = 0; i < displayLines.length; i++) {
+    const line = displayLines[i];
     context2d.fillText(line, 128, 64 - offset + lineHeight * (i + 1));
   }
 
