@@ -7,6 +7,13 @@ import * as THREE from "three";
 
 const { tickRate, cameraDamping } = constants;
 
+const messageDisplayer = (displayElement) => (username, text) => {
+  const message = document.createElement("div");
+  message.classList = "chat-text";
+  message.innerText = `[${username}]: ${text}`;
+  displayElement.append(message);
+};
+
 const setupSocket = (world) => {
   const URL = "/";
   const socket = io(URL, { autoConnect: false });
@@ -23,6 +30,7 @@ const setupSocket = (world) => {
       ...components,
       ...playerComponents(world),
     });
+    world.resources.username = components.username;
     const mesh = world.components.mesh.get(eid);
 
     world.resources.controls = {
@@ -86,6 +94,51 @@ const setupSocket = (world) => {
   socket.connect();
 
   window.addEventListener("beforeunload", () => socket.disconnect());
+
+  world.resources.downKeys = new Set();
+
+  const chatInputElement = document.getElementById("chat-input");
+  const messageBoxElement = document.getElementById("chat-messages");
+  const displayMessage = messageDisplayer(messageBoxElement);
+
+  const ESCAPE = 27;
+  const ENTER = 13;
+
+  const onDocumentKeyDown = (e) => {
+    if (document.activeElement === chatInputElement) {
+      if (e.keyCode === ESCAPE) {
+        chatInputElement.blur();
+      }
+      if (e.keyCode === ENTER) {
+        const text = chatInputElement.value;
+        socket.emit("chat-message", text);
+
+        displayMessage(world.resources.username, text);
+
+        chatInputElement.value = "";
+        chatInputElement.blur();
+      }
+      return;
+    }
+    if (e.keyCode === ENTER) {
+      chatInputElement.focus();
+    }
+    world.resources.downKeys.add(e.keyCode);
+    console.log(e.keyCode);
+  };
+
+  const onDocumentKeyUp = (e) => {
+    if (document.activeElement === chatInputElement) return;
+    world.resources.downKeys.delete(e.keyCode);
+    console.log(e.keyCode);
+  };
+
+  socket.on("chat-message", ({ username, text }) => {
+    displayMessage(username, text);
+  });
+
+  document.addEventListener("keydown", onDocumentKeyDown);
+  document.addEventListener("keyup", onDocumentKeyUp);
 
   world.resources.socket = socket;
 };

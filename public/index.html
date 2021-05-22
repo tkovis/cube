@@ -17,9 +17,6 @@
            height: 100%;
            display: block;
         }
-        #ui * {
-           position: absolute;
-        }
         .center {
             display: flex;
             flex-direction: column;
@@ -37,6 +34,41 @@
         }
         .sign-form {
             height: 75vh;
+        }
+        #chat-ui {
+            position: absolute;
+            left: 10px;
+            bottom: 10px; 
+            background: rgba(1.0, 1.0, 1.0, 0.0);
+            height: 400px;
+            width: 400px;
+            padding: 10px 10px;
+            border-radius: 10px;
+        }
+        #chat-ui-text-area {
+            position: static;
+            display: flex;
+            height: 100%;
+            width: 100%;
+            overflow: scroll;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+        #chat-messages {
+            max-height: 300px;
+            overflow: scroll;
+        }
+        .chat-text {
+            position: static;
+            font-size: 1em;
+            text-shadow: 2px 2px 5px black;
+            color: white;
+        }
+        #chat-input {
+            position: static;
+            background: rgba(0, 0, 0, 0);
+            width: 90%;
+            margin-top: 5px;
         }
         </style>
 </head>
@@ -68,7 +100,15 @@
         </div>
     </div>
     <div id="ui" style="display: none;">
-        <button id="logout" style="right: 0.5em; top: 0.5em;">logout</button>
+        <button id="logout" style="position: absolute; right: 0.5em; top: 0.5em;">logout</button>
+        <div id="chat-ui">
+            <div id="chat-ui-text-area">
+                <div id="chat-messages">
+                    <div class="chat-text">Welcome!</div>
+                </div>
+                <input id="chat-input">
+            </div>
+        </div>
     </div>
     <canvas id="canvas" style="display: none;"></canvas>
 </body>

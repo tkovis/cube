@@ -104,20 +104,6 @@ export const init = () => {
   const world = ecs.createWorld();
 
   world.resources.canvas = canvas;
-  world.resources.downKeys = new Set();
-
-  const onDocumentKeyDown = (e) => {
-    world.resources.downKeys.add(e.keyCode);
-    console.log(e.keyCode);
-  };
-
-  const onDocumentKeyUp = (e) => {
-    world.resources.downKeys.delete(e.keyCode);
-    console.log(e.keyCode);
-  };
-
-  document.addEventListener("keydown", onDocumentKeyDown);
-  document.addEventListener("keyup", onDocumentKeyUp);
 
   const geometry = new THREE.BoxGeometry(
     cubeDimension,
@@ -167,7 +153,7 @@ export const onNewEntity = (world, eid, components) => {
     context2d.canvas.width = 256;
     context2d.canvas.height = 128;
     context2d.fillStyle = "#FFF";
-    context2d.font = "18pt Helvetica";
+    context2d.font = "22pt Helvetica";
     context2d.shadowOffsetX = 3;
     context2d.shadowOffsetY = 3;
     context2d.shadowColor = "rgba(0,0,0,0.3)";
