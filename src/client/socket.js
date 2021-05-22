@@ -7,84 +7,97 @@ import * as THREE from "three";
 
 const { tickRate, cameraDamping } = constants;
 
-const secondsPerWord = 1 / 4;
-const reactionTime = 1.5;
+const messageDisplayer = (displayElement) => {
+  const secondsPerWord = 1 / 4;
+  const reactionTime = 1.5;
 
-const messageDisplayer = (displayElement) => (username, textInput, mesh) => {
-  const text = textInput.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " "); // remove extra whitespace
-  const message = document.createElement("div");
-  message.classList = "chat-text";
-  message.innerText = `[${username}]: ${text}`;
-  displayElement.append(message);
+  const existingMessages = {};
+  return (username, textInput, mesh) => {
+    clearTimeout(existingMessages[username]?.timeoutId);
+    existingMessages[username]?.clear();
+    const text = textInput.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " "); // remove extra whitespace
+    const message = document.createElement("div");
+    message.classList = "chat-text";
+    message.innerText = `[${username}]: ${text}`;
+    displayElement.append(message);
 
-  const canvas = document.createElement("canvas");
-  const context2d = canvas.getContext("2d");
-  context2d.canvas.width = 256;
-  context2d.canvas.height = 136;
-  context2d.fillStyle = "rgba(128,128,128,0.5)";
-  context2d.fillRect(0, 0, canvas.width, canvas.height);
-  context2d.fillStyle = "#FFF";
-  context2d.font = "18pt Helvetica";
-  context2d.shadowOffsetX = 3;
-  context2d.shadowOffsetY = 3;
-  context2d.shadowColor = "rgba(0,0,0,0.3)";
-  context2d.shadowBlur = 4;
-  context2d.textAlign = "center";
+    const canvas = document.createElement("canvas");
+    const context2d = canvas.getContext("2d");
+    context2d.canvas.width = 256;
+    context2d.canvas.height = 136;
+    context2d.fillStyle = "rgba(128,128,128,0.5)";
+    context2d.fillRect(0, 0, canvas.width, canvas.height);
+    context2d.fillStyle = "#FFF";
+    context2d.font = "18pt Helvetica";
+    context2d.shadowOffsetX = 3;
+    context2d.shadowOffsetY = 3;
+    context2d.shadowColor = "rgba(0,0,0,0.3)";
+    context2d.shadowBlur = 4;
+    context2d.textAlign = "center";
 
-  const maxWidth = context2d.canvas.width * 0.8;
-  const words = text.split(" ");
-  const lines = [];
-  let currentLine = [];
-  for (const word of words) {
-    const line = [...currentLine, word].join(" ");
-    const { width } = context2d.measureText(line);
-    if (width < maxWidth) {
-      currentLine.push(word);
-    } else {
-      lines.push(line);
-      currentLine = [];
+    const maxWidth = context2d.canvas.width * 0.8;
+    const words = text.split(" ");
+    const lines = [];
+    let currentLine = [];
+    for (const word of words) {
+      const line = [...currentLine, word].join(" ");
+      const { width } = context2d.measureText(line);
+      if (width < maxWidth) {
+        currentLine.push(word);
+      } else {
+        lines.push(line);
+        currentLine = [];
+      }
     }
-  }
-  const lastLine = currentLine.join(" ");
-  if (lastLine) {
-    lines.push(lastLine);
-  }
-  const lineHeight = 26;
-  const truncated = lines.length > 4;
-  const displayLines = lines.slice(0, 4);
-  const offset = (lineHeight * displayLines.length) / 2;
-  if (truncated) {
-    displayLines[3] = displayLines[3].slice(0, -3).trim() + "...";
-  }
-  for (let i = 0; i < displayLines.length; i++) {
-    const line = displayLines[i];
-    context2d.fillText(line, 128, 64 - offset + lineHeight * (i + 1));
-  }
+    const lastLine = currentLine.join(" ");
+    if (lastLine) {
+      lines.push(lastLine);
+    }
+    const lineHeight = 26;
+    const truncated = lines.length > 4;
+    const displayLines = lines.slice(0, 4);
+    const offset = (lineHeight * displayLines.length) / 2;
+    if (truncated) {
+      displayLines[3] = displayLines[3].slice(0, -3).trim() + "...";
+    }
+    for (let i = 0; i < displayLines.length; i++) {
+      const line = displayLines[i];
+      context2d.fillText(line, 128, 64 - offset + lineHeight * (i + 1));
+    }
 
-  const map = new THREE.CanvasTexture(context2d.canvas);
+    const map = new THREE.CanvasTexture(context2d.canvas);
 
-  const sprite = new THREE.Sprite(
-    new THREE.SpriteMaterial({ map: map, color: 0xffffff, fog: false })
-  );
-  sprite.scale.set(11, 6, 1);
-  sprite.position.y += 5;
+    const sprite = new THREE.Sprite(
+      new THREE.SpriteMaterial({ map: map, color: 0xffffff, fog: false })
+    );
+    sprite.scale.set(11, 6, 1);
+    sprite.position.y += 5;
 
-  const floatingName = mesh.children.find((c) => c.name === "floatingName");
-  if (floatingName) {
-    floatingName.visible = false;
-  }
-  mesh.add(sprite);
-
-  const wordCount = text.split(" ").length;
-
-  setTimeout(() => {
+    const floatingName = mesh.children.find((c) => c.name === "floatingName");
     if (floatingName) {
-      floatingName.visible = true;
+      floatingName.visible = false;
     }
-    mesh?.remove(sprite);
-    map?.dispose();
-    canvas?.remove();
-  }, Math.min((reactionTime + wordCount * secondsPerWord) * 1000, 10_000));
+    mesh.add(sprite);
+
+    const wordCount = text.split(" ").length;
+
+    const clearBubble = () => {
+      if (floatingName) {
+        floatingName.visible = true;
+      }
+      mesh?.remove(sprite);
+      map?.dispose();
+      canvas?.remove();
+      delete existingMessages[username];
+    };
+
+    const timeoutId = setTimeout(
+      clearBubble,
+      Math.min((reactionTime + wordCount * secondsPerWord) * 1000, 10_000)
+    );
+
+    existingMessages[username] = { clear: clearBubble, timeoutId };
+  };
 };
 
 const setupSocket = (world) => {
@@ -185,9 +198,11 @@ const setupSocket = (world) => {
       }
       if (e.keyCode === ENTER) {
         const text = chatInputElement.value;
-        socket.emit("chat-message", text);
+        if (text.trim()) {
+          socket.emit("chat-message", text);
 
-        displayMessage(world.resources.username, text, world.resources.mesh);
+          displayMessage(world.resources.username, text, world.resources.mesh);
+        }
 
         chatInputElement.value = "";
         chatInputElement.blur();
