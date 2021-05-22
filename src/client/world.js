@@ -166,6 +166,7 @@ export const onNewEntity = (world, eid, components) => {
     const sprite = new THREE.Sprite(
       new THREE.SpriteMaterial({ map: map, color: 0xffffff, fog: false })
     );
+    sprite.name = "floatingName";
     sprite.scale.set(10, 5, 1);
     sprite.position.y += 5;
     components.mesh.add(sprite);

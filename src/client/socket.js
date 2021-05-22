@@ -21,7 +21,7 @@ const messageDisplayer = (displayElement) => (username, textInput, mesh) => {
   const context2d = canvas.getContext("2d");
   context2d.canvas.width = 256;
   context2d.canvas.height = 136;
-  context2d.fillStyle = "rgba(128,128,128,128.5)";
+  context2d.fillStyle = "rgba(128,128,128,0.5)";
   context2d.fillRect(0, 0, canvas.width, canvas.height);
   context2d.fillStyle = "#FFF";
   context2d.font = "18pt Helvetica";
@@ -69,13 +69,21 @@ const messageDisplayer = (displayElement) => (username, textInput, mesh) => {
   sprite.scale.set(11, 6, 1);
   sprite.position.y += 5;
 
+  const floatingName = mesh.children.find((c) => c.name === "floatingName");
+  if (floatingName) {
+    floatingName.visible = false;
+  }
+  mesh.add(sprite);
+
   const wordCount = text.split(" ").length;
 
-  mesh.add(sprite);
   setTimeout(() => {
-    mesh.remove(sprite);
-    map.dispose();
-    canvas.remove();
+    if (floatingName) {
+      floatingName.visible = true;
+    }
+    mesh?.remove(sprite);
+    map?.dispose();
+    canvas?.remove();
   }, Math.min((reactionTime + wordCount * secondsPerWord) * 1000, 10_000));
 };
 
