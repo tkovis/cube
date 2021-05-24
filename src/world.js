@@ -19,12 +19,14 @@ export const init = () => {
   world.resources.createEntity = createEntity;
 
   const createPlayerComponents = async (eid, username) => {
+    const defaultQuaternion = { x: 0, y: 0, z: 0, w: -1 };
+    const defaultPosition = { x: 0, y: cubeDimension / 2, z: 0 };
     const mesh = (await db.get(`entities.${eid}.mesh`)) || {
-      position: { x: 0, y: cubeDimension / 2, z: 0 },
-      quaternion: {},
+      position: defaultPosition,
+      quaternion: defaultQuaternion,
     };
-    mesh.position = mesh.position || { x: 0, y: cubeDimension / 2, z: 0 };
-    mesh.quaternion = mesh.quaternion || { x: 0, y: 0, z: 0, w: -1 };
+    mesh.position = mesh.position || defaultPosition;
+    mesh.quaternion = mesh.quaternion || defaultQuaternion;
     return {
       mesh,
       username,
