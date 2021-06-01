@@ -98,26 +98,36 @@ export const controlSystem = {
       const mesh = world.components.mesh.get(eid);
       const speed = 0.01;
       let dirty = false;
-      if (world.resources.downKeys.has(keyCodes["w"])) {
+      const downKeys = world.resources.downKeys;
+      const forward = downKeys.has(keyCodes["w"]);
+      const backward = downKeys.has(keyCodes["s"]);
+      const leftTurn = downKeys.has(keyCodes["a"]);
+      const rightTurn = downKeys.has(keyCodes["d"]);
+      if (forward) {
         dirty = true;
         mesh.translateZ(speed * deltaTime);
       }
-      if (world.resources.downKeys.has(keyCodes["s"])) {
+      if (backward) {
         dirty = true;
         mesh.translateZ(-speed * deltaTime);
       }
-      if (world.resources.downKeys.has(keyCodes["a"])) {
+      if (leftTurn) {
         dirty = true;
         mesh.rotateOnAxis(
           new THREE.Vector3(0, 1, 0),
           ((Math.PI / 2) * deltaTime) / 1000
         );
       }
-      if (world.resources.downKeys.has(keyCodes["d"])) {
+      if (rightTurn) {
         dirty = true;
         mesh.rotateOnAxis(
           new THREE.Vector3(0, 1, 0),
           (-(Math.PI / 2) * deltaTime) / 1000
+        );
+      }
+      if ((forward || backward) && !(forward && backward)) {
+        world.resources.toastMixer?.update(
+          deltaTime * 0.001 * (forward ? 1 : -1)
         );
       }
       if (dirty) {

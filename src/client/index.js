@@ -83,11 +83,11 @@ const resumeSession = async () => {
 
 resumeSession();
 
-const startGame = () => {
+const startGame = async () => {
   document.getElementById("pre-game").style = "display: none;";
   document.getElementById("canvas").style = "";
   document.getElementById("ui").style = "";
-  const world = init();
+  const world = await init();
 
   setupSocket(world);
 

@@ -20,7 +20,7 @@ export const init = () => {
 
   const createPlayerComponents = async (eid, username) => {
     const defaultQuaternion = { x: 0, y: 0, z: 0, w: -1 };
-    const defaultPosition = { x: 0, y: cubeDimension / 2, z: 0 };
+    const defaultPosition = { x: 0, y: cubeDimension / 2 + 2, z: 0 };
     const mesh = (await db.get(`entities.${eid}.mesh`)) || {
       position: defaultPosition,
       quaternion: defaultQuaternion,

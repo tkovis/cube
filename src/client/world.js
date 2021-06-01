@@ -1,5 +1,6 @@
 import ecs from "./ecs.js";
 import * as THREE from "three";
+import gltf from "./gltf";
 import {
   moveSystem,
   debugSystem,
@@ -21,7 +22,7 @@ const createCamera = () => {
   const fov = 75;
   const aspect = 2;
   const near = 0.1;
-  const far = 100;
+  const far = 1000;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.y = 30;
   camera.position.z = -30;
@@ -77,7 +78,7 @@ const components = [
   "username",
 ];
 
-export const init = () => {
+export const init = async () => {
   const canvas = document.querySelector("#canvas");
   const renderer = createRenderer(canvas);
   const camera = createCamera();
@@ -102,6 +103,36 @@ export const init = () => {
 
   console.time("init");
   const world = ecs.createWorld();
+
+  const modelLoad = gltf.load("./assets/gltf/4amigops.gltf").then((gltf) => {
+    console.log({ gltf });
+
+    gltf.scene.scale.setScalar(8);
+
+    gltf.scene.traverse((c) => {
+      // prevent rae from blinking in and out of existance
+      c.frustumCulled = false;
+    });
+
+    scene.add(gltf.scene);
+
+    const [toastMesh] = gltf.scene.children.find(
+      (c) => c.name === "toast_control"
+    ).children;
+    const [walkAnimation] = gltf.animations;
+    console.log({ walkAnimation, toastMesh });
+    world.resources.models = world.resources.model || {};
+    world.resources.models.toast = toastMesh;
+    const toastMixer = new THREE.AnimationMixer(toastMesh);
+
+    toastMixer.clipAction(walkAnimation).play();
+
+    gltf.animations; // Array<THREE.AnimationClip>
+    gltf.scenes; // Array<THREE.Group>
+    gltf.cameras; // Array<THREE.Camera>
+    gltf.asset; // Object
+    world.resources.toastMixer = toastMixer;
+  });
 
   world.resources.canvas = canvas;
 
@@ -130,16 +161,16 @@ export const init = () => {
 
   console.timeEnd("init");
 
+  await modelLoad;
+
   return world;
 };
 
 export const onNewEntity = (world, eid, components) => {
   if (components.mesh) {
     const { position, quaternion } = components.mesh;
-    const mesh = new THREE.Mesh(
-      world.resources.geometries.cube,
-      world.resources.materials.cube
-    );
+    const mesh = world.resources.models.toast;
+    mesh.scale.setScalar(2);
     mesh.position.x = position.x;
     mesh.position.y = position.y;
     mesh.position.z = position.z;
@@ -167,7 +198,7 @@ export const onNewEntity = (world, eid, components) => {
       new THREE.SpriteMaterial({ map: map, color: 0xffffff, fog: false })
     );
     sprite.name = "floatingName";
-    sprite.scale.set(10, 5, 1);
+    sprite.scale.set(6, 3, 1);
     sprite.position.y += 5;
     components.mesh.add(sprite);
   }
