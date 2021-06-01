@@ -10,7 +10,7 @@
     "start": "npm-run-all -p server client:watch server:watch",
     "client:build": "webpack --mode production --config webpack-client.config.js",
     "server:build": "webpack --mode production --config webpack-server.config.js",
-    "prod": "npm run server:build && npm run client:build && PORT=80 node dist/index.js"
+    "prod": "npm run server:build && npm run client:build && PORT=3000 node dist/index.js"
   },
   "author": "",
   "license": "ISC",
