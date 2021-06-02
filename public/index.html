@@ -70,6 +70,27 @@
             width: 90%;
             margin-top: 5px;
         }
+        #register-success-display {
+            background-color: greenyellow;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 2px 2px;
+        }
+        .error-card {
+            background-color: red;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 2px 2px;
+        }
+        .info-card {
+            background-color: lightblue;
+            padding: 8px;
+            border-radius: 8px;
+            box-shadow: 2px 2px;
+        }
+        .invisible{
+            display: none;
+        }
         </style>
 </head>
 <body>
@@ -77,6 +98,8 @@
         <div class="center sign-form">
             <div id="login" class="center">
                 <h1>Login</h1>
+                <div id="register-success-display" class="error-card invisible">Account registered! Type in password to login.</div>
+                <div id="login-error-display" class="error-card invisible">Error.</div>
                 <form id="login-form" class="center">
                     <label for="username" class="left">Username</label>
                     <input type="text" id="login-username" name="login-username"/>
@@ -88,6 +111,7 @@
             </div>
             <div id="register" class="center sign-form" style="display: none;">
                 <h1>Register</h1>
+                <div id="register-error-display" class="error-card invisible">Error.</div>
                 <form id="register-form" class="center">
                     <label for="username" class="left">Username</label>
                     <input type="text" id="register-username" name="register-username"/>
@@ -95,6 +119,8 @@
                     <input type="password" id="register-password" name="register-password"/>
                     <button type="submit" class="full-width">Register</button>
                 </form>
+
+                <div id="register-password-validation-info" class="info-card invisible">Your password needs to have a special character, a digit, a lowercase letter, an uppercase letter and atleast 8 characters</div>
                 <a href="/" id="login-link">Go to login</a>
             </div>
         </div>

@@ -4,8 +4,21 @@ import ecs from "./ecs.js";
 import { strongRegex } from "../shared/regex";
 import backend from "./backend";
 
+const clearErrors = () => {
+  const elements = document.getElementsByClassName("error-card");
+  console.log([...elements]);
+  [...document.getElementsByClassName("error-card")].forEach((element) => {
+    element.className =
+      element.className
+        .split(" ")
+        .filter((cn) => cn !== "invisible")
+        .join("") + " invisible";
+  });
+};
+
 const goToRegister = async (e) => {
   e.preventDefault();
+  clearErrors();
   document.getElementById("login").style = "display: none;";
   document.getElementById("register").style = "";
 };
@@ -14,6 +27,7 @@ document.getElementById("register-link").onclick = goToRegister;
 
 const goToLogin = async (e) => {
   e?.preventDefault();
+  clearErrors();
   document.getElementById("register").style = "display: none;";
   document.getElementById("login").style = "";
 };
@@ -30,6 +44,20 @@ const register = async (e) => {
   if (res.status === 200) {
     goToLogin();
     document.getElementById("login-username").value = username;
+    const element = document.getElementById("register-success-display");
+    element.className = element.className
+      .split(" ")
+      .filter((cn) => cn !== "invisible")
+      .join(" ");
+    return;
+  }
+  if (res.json.error) {
+    const element = document.getElementById("register-error-display");
+    element.innerText = res.json.error;
+    element.className = element.className
+      .split(" ")
+      .filter((cn) => cn !== "invisible")
+      .join(" ");
   }
 };
 
@@ -41,10 +69,21 @@ const login = async (e) => {
   const password = document.getElementById("login-password").value;
 
   const res = await backend.post("/token", { username, password });
+  console.log(res);
   if (res.status === 200) {
     sessionStorage.setItem("accessToken", res.json.accessToken);
     sessionStorage.setItem("refreshToken", res.json.refreshToken);
     startGame();
+    return;
+  }
+  if (res.json.error) {
+    const element = document.getElementById("login-error-display");
+    element.innerText = res.json.error;
+    element.className = element.className
+      .split(" ")
+      .filter((cn) => cn !== "invisible")
+      .join(" ");
+    return;
   }
 };
 
@@ -56,6 +95,26 @@ const logout = async () => {
 };
 
 document.getElementById("logout").onclick = logout;
+
+const onPasswordChange = (e) => {
+  const element = document.getElementById("register-password-validation-info");
+  const classList = [...element.classList];
+  if (
+    classList.find((cn) => cn === "invisible") &&
+    !strongRegex.test(e.target.value)
+  ) {
+    element.classList.remove("invisible");
+    return;
+  }
+  if (
+    !classList.find((cn) => cn === "invisible") &&
+    strongRegex.test(e.target.value)
+  ) {
+    element.classList.add("invisible");
+  }
+};
+
+document.getElementById("register-password").oninput = onPasswordChange;
 
 const resumeSession = async () => {
   const preGameElement = document.getElementById("pre-game");
