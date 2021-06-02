@@ -60,7 +60,9 @@ export const moveSystem = {
       desiredPosition.lerp(frame.target.mesh.position, ratio);
       desiredQuaternion.copy(frame.current.quaternion);
       desiredQuaternion.slerp(frame.target.mesh.quaternion, ratio);
-      const { position, quaternion } = world.components.mesh.get(eid);
+      const mesh = world.components.mesh.get(eid);
+      const { position, quaternion } = mesh;
+      mesh.mixer?.update(deltaTime * 0.001);
       position.x = desiredPosition.x;
       position.y = desiredPosition.y;
       position.z = desiredPosition.z;
@@ -68,6 +70,7 @@ export const moveSystem = {
       quaternion.y = desiredQuaternion.y;
       quaternion.z = desiredQuaternion.z;
       quaternion.w = desiredQuaternion.w;
+      ecs.removeComponents(world, eid, ["meshTarget"]);
     });
   },
 };
@@ -104,33 +107,25 @@ export const controlSystem = {
       const leftTurn = downKeys.has(keyCodes["a"]);
       const rightTurn = downKeys.has(keyCodes["d"]);
       if (forward) {
-        dirty = true;
         mesh.translateZ(speed * deltaTime);
       }
       if (backward) {
-        dirty = true;
         mesh.translateZ(-speed * deltaTime);
       }
       if (leftTurn) {
-        dirty = true;
         mesh.rotateOnAxis(
           new THREE.Vector3(0, 1, 0),
           ((Math.PI / 2) * deltaTime) / 1000
         );
       }
       if (rightTurn) {
-        dirty = true;
         mesh.rotateOnAxis(
           new THREE.Vector3(0, 1, 0),
           (-(Math.PI / 2) * deltaTime) / 1000
         );
       }
-      if ((forward || backward) && !(forward && backward)) {
-        world.resources.toastMixer?.update(
-          deltaTime * 0.001 * (forward ? 1 : -1)
-        );
-      }
-      if (dirty) {
+      if (forward || backward || leftTurn || rightTurn) {
+        mesh.mixer?.update(deltaTime * 0.001);
         world.resources.socket.emit("new position", {
           eid,
           position: mesh.position,

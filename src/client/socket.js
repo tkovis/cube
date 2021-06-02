@@ -70,7 +70,7 @@ const messageDisplayer = (displayElement) => {
     const sprite = new THREE.Sprite(
       new THREE.SpriteMaterial({ map: map, color: 0xffffff, fog: false })
     );
-    sprite.scale.set(11, 6, 1);
+    sprite.scale.set(7, 4, 1);
     sprite.position.y += 5;
 
     const floatingName = mesh.children.find((c) => c.name === "floatingName");

@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
 import random from "./random";
 
-const accessTokenSecret = random.hex(40);
-const refreshTokenSecret = random.hex(40);
+const accessTokenSecret = "secret1"; //random.hex(40);
+const refreshTokenSecret = "secret2"; //random.hex(40);
 
 const sign = (payload, secret, options) =>
   new Promise((resolve, reject) =>

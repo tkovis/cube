@@ -1,5 +1,6 @@
 import ecs from "./ecs.js";
 import * as THREE from "three";
+import { SkeletonUtils } from "three/examples/jsm/utils/SkeletonUtils";
 import gltf from "./gltf";
 import {
   moveSystem,
@@ -119,19 +120,16 @@ export const init = async () => {
     const [toastMesh] = gltf.scene.children.find(
       (c) => c.name === "toast_control"
     ).children;
-    const [walkAnimation] = gltf.animations;
-    console.log({ walkAnimation, toastMesh });
+    const [walk] = gltf.animations;
+    toastMesh.animation = { walk };
+
     world.resources.models = world.resources.model || {};
     world.resources.models.toast = toastMesh;
-    const toastMixer = new THREE.AnimationMixer(toastMesh);
-
-    toastMixer.clipAction(walkAnimation).play();
 
     gltf.animations; // Array<THREE.AnimationClip>
     gltf.scenes; // Array<THREE.Group>
     gltf.cameras; // Array<THREE.Camera>
     gltf.asset; // Object
-    world.resources.toastMixer = toastMixer;
   });
 
   world.resources.canvas = canvas;
@@ -169,7 +167,14 @@ export const init = async () => {
 export const onNewEntity = (world, eid, components) => {
   if (components.mesh) {
     const { position, quaternion } = components.mesh;
-    const mesh = world.resources.models.toast;
+    console.log(world.resources.models.toast);
+    const toastBase = world.resources.models.toast;
+    const mesh = SkeletonUtils.clone(toastBase);
+    const mixer = new THREE.AnimationMixer(mesh);
+    const walk = mixer.clipAction(toastBase.animation.walk);
+    walk.play();
+    mesh.mixer = mixer;
+    console.log(mesh);
     mesh.scale.setScalar(2);
     mesh.position.x = position.x;
     mesh.position.y = position.y;
