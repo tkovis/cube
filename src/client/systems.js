@@ -99,38 +99,25 @@ export const controlSystem = {
     // set latest target from updates
     world.components.control.forEach((_, eid) => {
       const mesh = world.components.mesh.get(eid);
-      const speed = 0.01;
-      let dirty = false;
-      const downKeys = world.resources.downKeys;
-      const forward = downKeys.has(keyCodes["w"]);
-      const backward = downKeys.has(keyCodes["s"]);
-      const leftTurn = downKeys.has(keyCodes["a"]);
-      const rightTurn = downKeys.has(keyCodes["d"]);
-      if (forward) {
-        mesh.translateZ(speed * deltaTime);
-      }
-      if (backward) {
-        mesh.translateZ(-speed * deltaTime);
-      }
-      if (leftTurn) {
-        mesh.rotateOnAxis(
-          new THREE.Vector3(0, 1, 0),
-          ((Math.PI / 2) * deltaTime) / 1000
-        );
-      }
-      if (rightTurn) {
-        mesh.rotateOnAxis(
-          new THREE.Vector3(0, 1, 0),
-          (-(Math.PI / 2) * deltaTime) / 1000
-        );
-      }
-      if (forward || backward || leftTurn || rightTurn) {
-        mesh.mixer?.update(deltaTime * 0.001);
-        world.resources.socket.emit("new position", {
-          eid,
-          position: mesh.position,
-          quaternion: mesh.quaternion,
-        });
+      const position = mesh?.position;
+      const path = mesh?.path;
+      if (path?.length) {
+        mesh.mixer.update(deltaTime * 0.001);
+        const target = new THREE.Vector3();
+        target.y = position.y;
+        target.x = path[0].x;
+        target.z = path[0].z;
+        mesh.lookAt(target);
+        const velocity = target.clone().sub(position);
+
+        if (velocity.lengthSq() > 0.5 * 0.5) {
+          velocity.normalize();
+          // Move player to target
+          position.add(velocity.multiplyScalar(deltaTime * 0.001 * 10));
+        } else {
+          // Remove node from the path we calculated
+          path.shift();
+        }
       }
     });
   },

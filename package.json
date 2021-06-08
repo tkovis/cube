@@ -24,6 +24,7 @@
     "socket.io": "^4.1.1",
     "socket.io-client": "^4.1.1",
     "three": "^0.128.0",
+    "three-pathfinding": "^0.14.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

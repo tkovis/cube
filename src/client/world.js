@@ -19,14 +19,20 @@ const createRenderer = (canvas) =>
     canvas,
   });
 
-const createCamera = () => {
-  const fov = 75;
-  const aspect = 2;
+const createCamera = (radius) => {
   const near = 0.1;
-  const far = 1000;
-  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.y = 30;
-  camera.position.z = -30;
+  const far = 10000;
+  const camera = new THREE.OrthographicCamera(
+    -radius,
+    radius,
+    radius,
+    -radius,
+    near,
+    far
+  );
+  camera.position.set(radius, radius, radius);
+  camera.lookAt(0, 0, 0);
+  camera.updateProjectionMatrix();
   return camera;
 };
 
@@ -43,17 +49,6 @@ const addAmbientLight = (scene) => {
   const intensity = 0.4;
   const light = new THREE.AmbientLight(color, intensity);
   scene.add(light);
-};
-
-const addGround = (scene) => {
-  const geo = new THREE.PlaneGeometry(100, 100);
-  const mat = new THREE.MeshLambertMaterial();
-  const ground = new THREE.Mesh(geo, mat);
-  ground.position.x = 0;
-  ground.position.y = 0;
-  ground.position.z = 0;
-  ground.rotation.x = Math.PI * -0.5;
-  scene.add(ground);
 };
 
 const resizeRendererToDisplaySize = (renderer) => {
@@ -82,19 +77,29 @@ const components = [
 export const init = async () => {
   const canvas = document.querySelector("#canvas");
   const renderer = createRenderer(canvas);
-  const camera = createCamera();
+  const radius = 40;
+  const camera = createCamera(radius);
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("white");
   addDirectionalLight(scene);
   addAmbientLight(scene);
-  addGround(scene);
 
   function render() {
     renderer.render(scene, camera);
 
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
-      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      const aspect = canvas.clientWidth / canvas.clientHeight;
+      const height = radius / aspect;
+      const width = radius * aspect;
+      camera.left = -width;
+      camera.right = width;
+      console.log(
+        { camera, height, width },
+        aspect,
+        canvas.clientWidth,
+        canvas.clientHeight
+      );
       camera.updateProjectionMatrix();
     }
 
@@ -105,9 +110,28 @@ export const init = async () => {
   console.time("init");
   const world = ecs.createWorld();
 
-  const modelLoad = gltf.load("./assets/gltf/4amigops.gltf").then((gltf) => {
-    console.log({ gltf });
+  world.resources.cameraOffset = radius;
 
+  const navLoad = gltf.load("./assets/gltf/ground.nav.gltf").then((gltf) => {
+    gltf.scene.traverse((node) => {
+      if (node.name === "ground") {
+        world.resources.ground = node;
+      }
+      if (node.name === "ground_nav") {
+        world.resources.navMesh = node;
+      }
+    });
+  });
+
+  const groundLoad = gltf.load("./assets/gltf/ground.gltf").then((gltf) => {
+    gltf.scene.traverse((node) => {
+      if (node.name === "ground") {
+        scene.add(node);
+      }
+    });
+  });
+
+  const modelLoad = gltf.load("./assets/gltf/4amigops.gltf").then((gltf) => {
     gltf.scene.scale.setScalar(8);
 
     gltf.scene.traverse((c) => {
@@ -125,11 +149,6 @@ export const init = async () => {
 
     world.resources.models = world.resources.model || {};
     world.resources.models.toast = toastMesh;
-
-    gltf.animations; // Array<THREE.AnimationClip>
-    gltf.scenes; // Array<THREE.Group>
-    gltf.cameras; // Array<THREE.Camera>
-    gltf.asset; // Object
   });
 
   world.resources.canvas = canvas;
@@ -160,6 +179,8 @@ export const init = async () => {
   console.timeEnd("init");
 
   await modelLoad;
+  await groundLoad;
+  await navLoad;
 
   return world;
 };

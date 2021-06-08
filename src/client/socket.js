@@ -4,6 +4,7 @@ import { playerComponents } from "./components.js";
 import ecs from "./ecs.js";
 import constants from "../shared/constants.json";
 import * as THREE from "three";
+import { getNavigationHandler } from "./pathfinding";
 
 const { tickRate, cameraDamping } = constants;
 
@@ -116,8 +117,12 @@ const setupSocket = (world) => {
       ...components,
       ...playerComponents(world),
     });
+
+    document.addEventListener("click", getNavigationHandler(world, eid), false);
+
     world.resources.username = components.username;
     const mesh = world.components.mesh.get(eid);
+    mesh.position.y = 1.75;
     world.resources.mesh = mesh;
 
     world.resources.controls = {
@@ -125,32 +130,17 @@ const setupSocket = (world) => {
       currentLookAt: new THREE.Vector3(),
       target: mesh,
     };
+    const camera = world.resources.camera;
+    camera.position.add(mesh.position);
 
-    const controlSystem = {
-      name: "controlSystem",
-      execute: (world, deltaTime) => {
-        const { currentPosition, currentLookAt, target } =
-          world.resources.controls;
-        const camera = world.resources.camera;
-
-        const idealOffset = new THREE.Vector3(-15, 20, -30);
-        idealOffset.applyQuaternion(target.quaternion);
-        idealOffset.add(target.position);
-
-        const idealLookAt = new THREE.Vector3(0, 0, 2);
-        idealLookAt.applyQuaternion(target.quaternion);
-        idealLookAt.add(target.position);
-
-        const t = 1.0 - Math.pow(cameraDamping, deltaTime / 1000);
-
-        currentPosition.lerp(idealOffset, t);
-        currentLookAt.lerp(idealLookAt, t);
-
-        camera.position.copy(currentPosition);
-        camera.lookAt(currentLookAt);
+    const cameraSystem = {
+      name: "cameraSystem",
+      execute: () => {
+        camera.position.x = mesh.position.x + 50;
+        camera.position.z = mesh.position.z + 50;
       },
     };
-    ecs.registerSystem(world, controlSystem);
+    ecs.registerSystem(world, cameraSystem);
   });
 
   socket.on("new player", ({ eid, components }) => {
