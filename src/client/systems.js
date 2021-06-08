@@ -114,6 +114,11 @@ export const controlSystem = {
           velocity.normalize();
           // Move player to target
           position.add(velocity.multiplyScalar(deltaTime * 0.001 * 10));
+          world.resources.socket.emit("new position", {
+            eid,
+            position: mesh.position,
+            quaternion: mesh.quaternion,
+          });
         } else {
           // Remove node from the path we calculated
           path.shift();
