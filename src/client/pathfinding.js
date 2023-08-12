@@ -29,8 +29,6 @@ const findPath = (startPosition, targetPosition, zoneID, groupID) => {
     true
   );
 
-  console.log({ closestNode, farthestNode });
-
   // If we can't find any node, just go straight to the target
   if (!closestNode || !farthestNode) {
     return null;
@@ -109,7 +107,7 @@ export const getNavigationHandler = (world, eid) => {
     raycaster.setFromCamera(mouse, camera);
 
     const insersectionPoint = raycaster.intersectObject(navMesh)[0]?.point;
-    console.log(insersectionPoint);
+    
     if (!insersectionPoint) return;
 
     target.copy(insersectionPoint);
@@ -117,7 +115,6 @@ export const getNavigationHandler = (world, eid) => {
 
     // Calculate a path to the target and store it
     const path = findPath(current, target, ZONE, groupId);
-    console.log({ path });
 
     if (path?.length) {
       mesh.path = path;

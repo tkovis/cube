@@ -188,14 +188,12 @@ export const init = async () => {
 export const onNewEntity = (world, eid, components) => {
   if (components.mesh) {
     const { position, quaternion } = components.mesh;
-    console.log(world.resources.models.toast);
     const toastBase = world.resources.models.toast;
     const mesh = SkeletonUtils.clone(toastBase);
     const mixer = new THREE.AnimationMixer(mesh);
     const walk = mixer.clipAction(toastBase.animation.walk);
     walk.play();
     mesh.mixer = mixer;
-    console.log(mesh);
     mesh.scale.setScalar(2);
     mesh.position.x = position.x;
     mesh.position.y = position.y;

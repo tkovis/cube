@@ -56,10 +56,12 @@ export const moveSystem = {
       const ratio = Math.max(Math.min(frame.target.time / tickRate, 1.0), 0.0);
       const desiredPosition = new THREE.Vector3();
       const desiredQuaternion = new THREE.Quaternion();
+      const { x, y, z, w } = frame.target.mesh.quaternion
+      const targetQuaternion = new THREE.Quaternion(x, y, z, w);
       desiredPosition.copy(frame.current.position);
       desiredPosition.lerp(frame.target.mesh.position, ratio);
       desiredQuaternion.copy(frame.current.quaternion);
-      desiredQuaternion.slerp(frame.target.mesh.quaternion, ratio);
+      desiredQuaternion.slerp(targetQuaternion, ratio);
       const mesh = world.components.mesh.get(eid);
       const { position, quaternion } = mesh;
       mesh.mixer?.update(deltaTime * 0.001);

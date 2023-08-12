@@ -203,13 +203,11 @@ const setupSocket = (world) => {
       chatInputElement.focus();
     }
     world.resources.downKeys.add(e.keyCode);
-    console.log(e.keyCode);
   };
 
   const onDocumentKeyUp = (e) => {
     if (document.activeElement === chatInputElement) return;
     world.resources.downKeys.delete(e.keyCode);
-    console.log(e.keyCode);
   };
 
   socket.on("chat-message", ({ eid, username, text }) => {

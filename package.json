@@ -20,7 +20,7 @@
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
-    "level-rocksdb": "^4.0.0",
+    "level-rocksdb": "^5.0.0",
     "socket.io": "^4.1.1",
     "socket.io-client": "^4.1.1",
     "three": "^0.128.0",
@@ -30,6 +30,7 @@
   "devDependencies": {
     "copy-webpack-plugin": "^9.0.0",
     "html-webpack-plugin": "^5.3.1",
+    "nodemon": "^2.0.20",
     "npm-run-all": "^4.1.5",
     "webpack": "^5.37.0",
     "webpack-cli": "^4.7.0",

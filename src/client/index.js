@@ -69,7 +69,6 @@ const login = async (e) => {
   const password = document.getElementById("login-password").value;
 
   const res = await backend.post("/token", { username, password });
-  console.log(res);
   if (res.status === 200) {
     sessionStorage.setItem("accessToken", res.json.accessToken);
     sessionStorage.setItem("refreshToken", res.json.refreshToken);
